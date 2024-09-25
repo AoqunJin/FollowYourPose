@@ -24,7 +24,7 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from followyourpose.models.unet import UNet3DConditionModel
-from followyourpose.data.hdvila import HDVilaDataset
+from followyourpose.data.hyper_stage import HyperStageDataset
 from followyourpose.pipelines.pipeline_followyourpose import FollowYourPosePipeline
 from followyourpose.util import save_videos_grid, ddim_inversion
 from einops import rearrange
@@ -48,6 +48,7 @@ def main(
         "attn_temp",
     ),
     train_batch_size: int = 1,
+    num_workers: int = 2,
     max_train_steps: int = 500,
     learning_rate: float = 3e-5,
     scale_lr: bool = False,
@@ -67,6 +68,7 @@ def main(
     enable_xformers_memory_efficient_attention: bool = True,
     seed: Optional[int] = None,
     skeleton_path: Optional[str] = None,
+    use_skeleton_train: bool = True,
 ):
     *_, config = inspect.getargvalues(inspect.currentframe())
 
@@ -154,12 +156,12 @@ def main(
     )
 
     # Get the training dataset
-    train_dataset = HDVilaDataset(accelerator=accelerator, **train_data)
+    train_dataset = HyperStageDataset(**train_data)
 
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=train_batch_size
+        train_dataset, batch_size=train_batch_size, num_workers=num_workers
     )
 
     # Get the validation pipeline
@@ -273,7 +275,7 @@ def main(
 
                 batch["prompt_ids"] = tokenizer(
                     batch["sentence"], max_length=tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt"
-                ).input_ids[0].to(accelerator.device).unsqueeze(0)
+                ).input_ids.to(accelerator.device).unsqueeze(0)
                 
                 # Get the text embedding for conditioning
                 encoder_hidden_states = text_encoder(batch["prompt_ids"])[0]
@@ -287,7 +289,7 @@ def main(
                     raise ValueError(f"Unknown prediction type {noise_scheduler.prediction_type}")
 
                 # Predict the noise residual and compute loss
-                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, skeleton=skeleton, train_or_sample='train').sample
+                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, skeleton=skeleton, train_or_sample='train' if not use_skeleton_train else 'sample').sample
                 loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
 
                 # Gather the losses across all processes for logging (if we use distributed training).
@@ -333,7 +335,7 @@ def main(
                             sample = validation_pipeline(prompt, generator=generator, latents=ddim_inv_latent,
                                                         skeleton_path=skeleton_path,
                                                         **validation_data).videos
-                            save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}/{prompt}.gif")
+                            save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}/{idx}.gif")
                             samples.append(sample)
                         samples = torch.concat(samples)
                         save_path = f"{output_dir}/samples/sample-{global_step}.gif"
