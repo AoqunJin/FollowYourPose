@@ -378,7 +378,7 @@ class FollowYourPosePipeline(DiffusionPipeline):
         num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
         
         skeleton, save_skeleton = self.get_skeleton(skeleton_path, video_length, frame_skeleton_stride)
-        skeleton = skeleton.to(latents.device).repeat(2,1,1,1,1)
+        skeleton = skeleton.to(latents.device).repeat(2,1,1,1,1).to(text_embeddings.dtype)
         
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             for i, t in enumerate(timesteps):

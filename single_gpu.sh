@@ -1,5 +1,5 @@
-export NCCL_P2P_DISABLE="1"
-export NCCL_IB_DISABLE="1"
+# export NCCL_P2P_DISABLE="1"
+# export NCCL_IB_DISABLE="1"
 
 TORCH_DISTRIBUTED_DEBUG=DETAIL accelerate launch \
     --num_processes=1 --gpu_ids '0' \

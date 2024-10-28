@@ -180,6 +180,7 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str)
-    parser.add_argument("--skeleton_path", type=str)
+    # parser.add_argument("--skeleton_path", type=str)
     args = parser.parse_args()
-    main(**OmegaConf.load(args.config), skeleton_path = args.skeleton_path)
+    # main(**OmegaConf.load(args.config), skeleton_path = args.skeleton_path)
+    main(**OmegaConf.load(args.config))

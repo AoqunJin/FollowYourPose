@@ -10,6 +10,7 @@ from omegaconf import OmegaConf
 import torch
 import torch.nn.functional as F
 import torch.utils.checkpoint
+import torch.distributed as dist
 
 import diffusers
 import transformers
@@ -23,7 +24,9 @@ from diffusers.utils.import_utils import is_xformers_available
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
-from followyourpose.models.unet import UNet3DConditionModel
+from followyourpose.models.unet import UNet3DConditionModel, UNet2DConditionModel
+# from diffusers import UNet2DConditionModel
+
 from followyourpose.data.hyper_stage import HyperStageDataset
 from followyourpose.pipelines.pipeline_followyourpose import FollowYourPosePipeline
 from followyourpose.util import save_videos_grid, ddim_inversion
@@ -108,7 +111,9 @@ def main(
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_model_path, subfolder="tokenizer")
     text_encoder = CLIPTextModel.from_pretrained(pretrained_model_path, subfolder="text_encoder")
     vae = AutoencoderKL.from_pretrained(pretrained_model_path, subfolder="vae")
+    # unet = UNet2DConditionModel.from_pretrained_2d(pretrained_model_path, subfolder="unet")
     unet = UNet3DConditionModel.from_pretrained_2d(pretrained_model_path, subfolder="unet")
+    unet.skeleton_adapter.load_state_dict(torch.load("/home/ao/workspace/FollowYourPose/output-1004-0800/checkpoint-30000/skeleton_adapter.bin"))
 
     # Freeze vae and text_encoder
     vae.requires_grad_(False)
@@ -275,7 +280,7 @@ def main(
 
                 batch["prompt_ids"] = tokenizer(
                     batch["sentence"], max_length=tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt"
-                ).input_ids.to(accelerator.device).unsqueeze(0)
+                ).input_ids.to(accelerator.device)  # .unsqueeze(0)
                 
                 # Get the text embedding for conditioning
                 encoder_hidden_states = text_encoder(batch["prompt_ids"])[0]
@@ -312,10 +317,11 @@ def main(
                 train_loss = 0.0
 
                 if global_step % checkpointing_steps == 0:
-                    if accelerator.is_main_process:
-                        save_path = os.path.join(output_dir, f"checkpoint-{global_step}")
-                        accelerator.save_state(save_path)
-                        logger.info(f"Saved state to {save_path}")
+                    # if accelerator.is_main_process:  TODO DS ZeRO 2/3 save bug
+                    save_path = os.path.join(output_dir, f"checkpoint-{global_step}")
+                    accelerator.save_state(save_path)
+                    logger.info(f"Saved state to {save_path}")
+                    dist.barrier()
 
                 if global_step % validation_steps == 0:
                     if accelerator.is_main_process:

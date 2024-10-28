@@ -306,9 +306,9 @@ class CrossAttnDownBlock3D(nn.Module):
             else:
                 hidden_states = resnet(hidden_states, temb)
                 hidden_states = attn(hidden_states, encoder_hidden_states=encoder_hidden_states).sample
-                if ((idx+1)%3 == 0) and features_adapter is not None and len(features_adapter):
-                    hidden_states = hidden_states + features_adapter
-                idx = idx + 1
+            if ((idx+1)%3 == 0) and features_adapter is not None and len(features_adapter):
+                hidden_states = hidden_states + features_adapter
+            idx = idx + 1
                 
             output_states += (hidden_states,)
 
@@ -388,9 +388,9 @@ class DownBlock3D(nn.Module):
                 hidden_states = torch.utils.checkpoint.checkpoint(create_custom_forward(resnet), hidden_states, temb)
             else:
                 hidden_states = resnet(hidden_states, temb)
-                if ((idx+1)%3 == 0) and features_adapter is not None and len(features_adapter):
-                    hidden_states = hidden_states + features_adapter
-                idx = idx + 1
+            if ((idx+1)%3 == 0) and features_adapter is not None and len(features_adapter):
+                hidden_states = hidden_states + features_adapter
+            idx = idx + 1
 
             output_states += (hidden_states,)
 

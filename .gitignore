@@ -21,7 +21,7 @@
 
 /__pycache__
 
-/output
+/output*
 
 *.pyc
 
@@ -37,6 +37,4 @@
 
 /others
 
-/diffusers/metaworld
-
-/diffusers/hf_data
+/diffusers/metaworld*

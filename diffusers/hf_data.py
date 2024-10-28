@@ -27,15 +27,29 @@ def extract_frames_from_video(video_path, output_dir, text, task_name, frame_int
         
         if not ret:
             break
+        if model == "first_5_frames":
+            frame_interval = 1
+            if frame_number > 4:
+                break
+        if model == "last_2_frames":
+            frame_interval = 1
+            if frame_number < frame_count - 2:
+                frame_number += 1
+                continue
+        if model == "last_1_frames":
+            frame_interval = 1
+            if frame_number < frame_count - 1:
+                frame_number += 1
+                continue
         
         # Save frames at specified interval (every nth frame)
-        if frame_number % frame_interval == 0:
+        if (frame_number + 1) % frame_interval == 0:
             output_file = os.path.join(output_dir, f"{task_name}_{extracted_frame_number}.png")
             cv2.imwrite(output_file, frame)
             output_data.append({
                 'image': output_file,
                 'text': text,
-                'task': task_name
+                # 'task': task_name
             })
             extracted_frame_number += 1
         
@@ -71,14 +85,16 @@ def process_csv_and_split_videos(csv_path, output_dir, output_csv_path, frame_in
 
     # Write the output CSV
     with open(output_csv_path, mode='w', newline='', encoding='utf-8') as outfile:
-        writer = csv.DictWriter(outfile, fieldnames=['image', 'text', 'task'])
+        writer = csv.DictWriter(outfile, fieldnames=['image', 'text'])
         writer.writeheader()
         writer.writerows(output_rows)
 
 # Example usage
-csv_path = '/home/sora/workspace/meta_caption.csv'
-output_dir = '/home/sora/workspace/diffusers/hf_data/train'
-output_csv_path = '/home/sora/workspace/meta_caption_image.csv'
-frame_interval = 10  # Extract every 30th frame
+csv_path = '/home/ao/workspace/fs/diffusers/meta_caption_random.csv'
+output_dir = '/home/ao/workspace/fs/diffusers/hf_data_rl_2'
+output_csv_path = '/home/ao/workspace/fs/diffusers/metadata.csv'
+frame_interval = 100  # Extract every 3th frame
 
+# first_5_frames | last_2_frames | all_frames
+model = "all_frames"
 process_csv_and_split_videos(csv_path, output_dir, output_csv_path, frame_interval)

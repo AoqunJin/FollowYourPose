@@ -420,8 +420,9 @@ def main():
         #     data_files=data_files,
         #     cache_dir=args.cache_dir,
         # )
-        if args.data_dir is not None:
-            dataset = load_dataset("imagefolder", data_dir=args.data_dir, cache_dir=args.cache_dir)
+        
+        from load_hf_data import load_hf_data
+        dataset = load_hf_data(from_saved=None)
         # See more about loading custom images at
         # https://huggingface.co/docs/datasets/v2.4.0/en/image_load#imagefolder
 
@@ -641,6 +642,7 @@ def main():
             vae=vae,
             unet=unet,
             revision=args.revision,
+            safety_checker=None
         )
         pipeline.save_pretrained(args.output_dir)
 
