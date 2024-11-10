@@ -58,7 +58,7 @@ def get_frame_count(video_path):
     video = cv2.VideoCapture(video_path)
     
     if not video.isOpened():
-        raise ValueError(f"无法打开视频文件: {video_path}")
+        raise ValueError(f"Open Error: {video_path}")
     
     frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
     video.release()
@@ -76,9 +76,10 @@ def process_videos(csv_file, validation_pipeline, validation_data, generator, dd
         now = str(datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
         skeleton_path = skeleton_paths[idx]
         sample_frame_rate = 4
+        video_length = validation_data["video_length"]
         validation_data["video_length"] = get_frame_count(skeleton_path) // sample_frame_rate
         
-        while validation_data["video_length"] > 24:
+        while validation_data["video_length"] > video_length:
             sample_frame_rate += 1
             validation_data["video_length"] = get_frame_count(skeleton_path) // sample_frame_rate
             
@@ -88,7 +89,7 @@ def process_videos(csv_file, validation_pipeline, validation_data, generator, dd
         
         # Save individual sample video as GIF
         p = skeleton_path.split("/")[-1]
-        sample_output_dir = f"{output_dir}/inference/{p}.gif"
+        sample_output_dir = f"{output_dir}/inference/{p}.mp4"
         os.makedirs(os.path.dirname(sample_output_dir), exist_ok=True)
         save_videos_grid(sample, sample_output_dir)
         # samples.append(sample)
@@ -101,6 +102,7 @@ def process_videos(csv_file, validation_pipeline, validation_data, generator, dd
     
 def main(
     pretrained_model_path: str,
+    csv_file: str,
     output_dir: str,
     num_inv_steps: int,
     gradient_accumulation_steps: int = 1,
@@ -134,10 +136,10 @@ def main(
         
     # now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # output_dir = os.path.join(output_dir, now)
-    os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(f"{output_dir}/samples", exist_ok=True)
-    os.makedirs(f"{output_dir}/inv_latents", exist_ok=True)
-    OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
+    # os.makedirs(output_dir, exist_ok=True)
+    # os.makedirs(f"{output_dir}/samples", exist_ok=True)
+    # os.makedirs(f"{output_dir}/inv_latents", exist_ok=True)
+    # OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
 
     # Load scheduler, tokenizer and models.
     ddim_inv_scheduler = DDIMScheduler.from_pretrained(pretrained_model_path, subfolder='scheduler')
@@ -200,9 +202,6 @@ def main(
 
     #     global_step = int(load_path.split("-")[-1])
 
-    # Example usage
-    csv_file = '/home/ao/workspace/meta_caption_pr_B_f_2.csv'  # Update with actual path
-    output_dir = '/home/ao/workspace/tmp/output-1006-1334/checkpoint-20000'       # Update with actual path
     global_step = 1000                       # Replace with actual global step
     seed = 42                                # Replace with your seed
 
@@ -222,8 +221,9 @@ def main(
 
 if __name__ == "__main__":
     main(
-        pretrained_model_path="/home/ao/workspace/tmp/metaworld-1002-1800",
-        resume_from_checkpoint="/home/ao/workspace/tmp/output-1006-1334/checkpoint-20000/pytorch_model.bin",
-        output_dir="output",
+        pretrained_model_path="/path/to/sd_model",
+        resume_from_checkpoint="/path/to/3d/pytorch_model.bin",
+        csv_file = "/path/to/csv",
+        output_dir="/path/to/output",
         num_inv_steps=50
     )

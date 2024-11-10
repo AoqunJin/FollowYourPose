@@ -4,12 +4,14 @@ output_dir: "output"
 
 validation_data:
   prompts:
-    - "Red Cylinder, Red target point"
+    - "Nice glass window"
     - "Red Cylinder, Blue target point"
     - "Brown ferrule and green handle, Red Cylinder"
-    - "Brown ferrule and green handle, Red Cylinder, Ring outside the column, (Outside)"
+    - "Green drawer"
     - "Black metal safety door"
     - "Black metal safety door, Door close, (Close)"
+    - "Grey faucet with red handle"
+    - "White soccer net side"
   video_length: 24
   width: 512
   height: 512
@@ -23,10 +25,7 @@ validation_data:
 train_batch_size: 1
 validation_steps: 100
 
-# python zero_to_fp32.py /home/ao/workspace/FollowYourPose/output/checkpoint-10000 /home/ao/workspace/FollowYourPose/output/checkpoint-10000/pytorch_model.bin --tag=pytorch_model
-# resume_from_checkpoint: /home/ao/workspace/FollowYourPose/output/checkpoint-10000
-# skeleton_path: './pose_example/metaworld_ButtonPress_20240826_205555_pose.mp4'
-skeleton_path: '/home/ao/workspace/diffusers/video_data_human/metaworld_Instruct_20240826_163500_pose.mp4'
+skeleton_path: '/path/to/pose.mp4'
 
 seed: 33
 mixed_precision: 'fp16'

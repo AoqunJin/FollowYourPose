@@ -422,7 +422,7 @@ def main():
         # )
         
         from load_hf_data import load_hf_data
-        dataset = load_hf_data(from_saved=None)
+        dataset = load_hf_data(from_saved=args.data_dir)
         # See more about loading custom images at
         # https://huggingface.co/docs/datasets/v2.4.0/en/image_load#imagefolder
 

@@ -4,25 +4,10 @@ from datasets import concatenate_datasets
 
 def load_hf_data(from_saved=None, seed=42):
     if from_saved:
-        dataset = load_from_disk(from_saved)
+        dataset = load_from_disk(from_saved).shuffle(seed=seed).select(range(10000))
         return {"train": dataset}
     
-    # TODO 
-    # 12150 / 6000 (50%)
-    dataset1 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_p', split='train').shuffle(seed=seed).select(range(3000))
-    # 344985 / 6000 (5%)
-    ## dataset2 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_r', split='train').shuffle(seed=seed).select(range(6000))
-    # 2080
-    dataset2 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_rl', split='train')
-    # 10321 / 6000 (50%)
-    # dataset2 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_r_2', split='train').shuffle(seed=seed).select(range(3000))
-    # 1601
-    dataset3 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_f', split='train')
-    # 641
-    dataset4 = load_dataset("imagefolder", data_dir='/home/ao/workspace/fs/diffusers/hf_data_l', split='train')
-
-    dataset = concatenate_datasets([dataset1, dataset2, dataset3, dataset4])
-    # dataset = concatenate_datasets([dataset1, dataset2])
+    dataset = load_dataset("imagefolder", data_dir='/path/to/dataset', split='train')
 
     Set_A = set([
         'button-press-topdown-v2-goal-observable',     
@@ -56,17 +41,20 @@ def load_hf_data(from_saved=None, seed=42):
         'window-close-v2-goal-observable'
     ])
 
-    def filter_by_additional_feature(example):
-        return (example['additional_feature'] in Set_A)
+    # def filter_by_additional_feature(example):
+    #     print(example.keys())
+    #     return any(item in example['file_name'] for item in Set_A)
 
-    filtered_dataset = dataset.filter(filter_by_additional_feature)
+    # filtered_dataset = dataset.filter(filter_by_additional_feature)
 
-    filtered_dataset.shuffle(seed=42)
+    filtered_dataset = dataset
+    filtered_dataset.shuffle(seed=seed)
 
     return {"train": filtered_dataset}
 
 
 if __name__ == "__main__":
-    dataset = load_hf_data()
-    dataset["train"].save_to_disk("/home/ao/workspace/fs/diffusers/hf_data_tmp")
+    dataset = load_hf_data("/path/to/dataset")
+    print(dataset["train"])
+    dataset["train"].save_to_disk("/path/to/dataset")
     

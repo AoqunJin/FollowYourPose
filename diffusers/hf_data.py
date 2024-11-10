@@ -47,9 +47,8 @@ def extract_frames_from_video(video_path, output_dir, text, task_name, frame_int
             output_file = os.path.join(output_dir, f"{task_name}_{extracted_frame_number}.png")
             cv2.imwrite(output_file, frame)
             output_data.append({
-                'image': output_file,
+                'file_name': f"{task_name}/{task_name}_{extracted_frame_number}.png",
                 'text': text,
-                # 'task': task_name
             })
             extracted_frame_number += 1
         
@@ -85,15 +84,15 @@ def process_csv_and_split_videos(csv_path, output_dir, output_csv_path, frame_in
 
     # Write the output CSV
     with open(output_csv_path, mode='w', newline='', encoding='utf-8') as outfile:
-        writer = csv.DictWriter(outfile, fieldnames=['image', 'text'])
+        writer = csv.DictWriter(outfile, fieldnames=['file_name', 'text'])
         writer.writeheader()
         writer.writerows(output_rows)
 
 # Example usage
-csv_path = '/home/ao/workspace/fs/diffusers/meta_caption_random.csv'
-output_dir = '/home/ao/workspace/fs/diffusers/hf_data_rl_2'
-output_csv_path = '/home/ao/workspace/fs/diffusers/metadata.csv'
-frame_interval = 100  # Extract every 3th frame
+csv_path = '/path/to/csv'
+output_dir = '/path/to/output'
+output_csv_path = '/path/to/output_csv'
+frame_interval = 4  # Extract every 3th frame
 
 # first_5_frames | last_2_frames | all_frames
 model = "all_frames"

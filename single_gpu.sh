@@ -7,4 +7,4 @@ TORCH_DISTRIBUTED_DEBUG=DETAIL accelerate launch \
     --config="configs/pose_train.yaml" \
 
 # Use to train
-# nohup  bash single_gpu.sh>output.log 2>&1 & disown 
+# nohup bash single_gpu.sh>output.log 2>&1 & disown 

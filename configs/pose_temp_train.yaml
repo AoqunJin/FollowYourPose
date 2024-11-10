@@ -34,6 +34,7 @@ max_train_steps: 30000
 checkpointing_steps: 10000
 validation_steps: 500
 trainable_modules:
+  - "skeleton_adapter"
   - "attn1.to_q"
   - "attn2.to_q"
   - "attn_temp"

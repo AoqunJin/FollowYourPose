@@ -113,7 +113,7 @@ def main(
     vae = AutoencoderKL.from_pretrained(pretrained_model_path, subfolder="vae")
     # unet = UNet2DConditionModel.from_pretrained_2d(pretrained_model_path, subfolder="unet")
     unet = UNet3DConditionModel.from_pretrained_2d(pretrained_model_path, subfolder="unet")
-    unet.skeleton_adapter.load_state_dict(torch.load("/home/ao/workspace/FollowYourPose/output-1004-0800/checkpoint-30000/skeleton_adapter.bin"))
+    # unet.skeleton_adapter.load_state_dict(torch.load("/root/autodl-tmp/fs/metaworld-pose-b-1000-0000/checkpoint-5000/skeleton_adapter.bin"))
 
     # Freeze vae and text_encoder
     vae.requires_grad_(False)
